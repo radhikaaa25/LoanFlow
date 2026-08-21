@@ -50,24 +50,13 @@ It is engineered using modern distributed system patterns:
 
 ---
 
-## 🎨 Frontend Dashboard
 
-LoanFlow includes a modern, high-grade interactive Single Page Application (SPA) dashboard located in the [`/frontend`](file:///c:/Users/smile/OneDrive/Desktop/LoanFlow/frontend/index.html) directory.
-
-### Key Frontend Features:
+### Key Features:
 1. **📝 Apply for Loan Portal**: Submit applications and watch live state transitions (`SUBMITTED` ➔ `CREDIT_CHECKED` ➔ `UNDERWRITTEN` ➔ `DISBURSED`).
 2. **📊 Saga Pipeline Visualizer**: Interactive state node inspection with live JSON payload viewer for emitted Kafka events.
 3. **⚖️ Underwriter Manual Review Portal**: Interface for evaluating applications flagged in score range **550–699**.
 4. **💸 Idempotency Engine & Retry Simulator**: Allows demonstrating duplicate `Idempotency-Key` request rejection in real time.
 5. **🔔 Live Notification Event Stream**: Stream of Email & SMS alerts dispatched by `notification-service`.
-
-### How to Launch Frontend:
-Simply double-click [`frontend/index.html`](file:///c:/Users/smile/OneDrive/Desktop/LoanFlow/frontend/index.html) in any browser, or host via VS Code Live Server / Python HTTP server:
-```bash
-cd frontend
-python -m http.server 3000
-```
-Then visit `http://localhost:3000`.
 
 ## 🔑 Core Engineering & Design Concepts
 
@@ -136,18 +125,4 @@ mvn clean package -DskipTests
 
 ---
 
-## 💡 Placement Interview Questions & Talk-Track
 
-> **Q: Why did you choose microservices and Kafka for a loan origination system?**
-> **Answer**: Loan origination is a multi-step pipeline where each stage (credit scoring, manual underwriting, disbursement) has different scaling needs and execution speeds. Asynchronous event propagation via Kafka prevents slow external dependencies (like credit bureaus) from blocking the user who just submitted an application.
-
-> **Q: How do you prevent double-disbursement if the network drops during payment?**
-> **Answer**: The Disbursement Service implements idempotent processing. Every request carries a unique `Idempotency-Key`. The service checks an `idempotency_logs` database table before executing a fund transfer. If the key was previously processed, the original transaction response is returned without executing a 2nd transfer.
-
-> **Q: How does the system handle external credit bureau outages?**
-> **Answer**: We use Resilience4j Circuit Breaker on the credit bureau client. If failure threshold exceeds 50%, the circuit opens and routes requests to a fallback method that assigns a conservative credit score tier, preventing application threads from waiting and timing out.
-
----
-
-## 📜 License
-This project is open-source under the MIT License.
