@@ -1,0 +1,13 @@
+package com.loanflow.common.enums;
+
+public enum ApplicationStatus {
+    SUBMITTED,
+    CREDIT_CHECK_IN_PROGRESS,
+    CREDIT_CHECKED,
+    UNDERWRITING_IN_PROGRESS,
+    APPROVED,
+    REJECTED,
+    FLAGGED_FOR_MANUAL_REVIEW,
+    DISBURSED,
+    DISBURSEMENT_FAILED
+}

@@ -1,0 +1,339 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>LoanFlow — Microservices Loan Origination & Underwriting Platform</title>
+    <!-- Google Fonts & FontAwesome -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <!-- App Container -->
+    <div class="app-container">
+        <!-- Sidebar Header / Brand -->
+        <header class="navbar">
+            <div class="brand">
+                <div class="brand-icon">
+                    <i class="fa-solid fa-vault"></i>
+                </div>
+                <div class="brand-text">
+                    <h1>LoanFlow</h1>
+                    <span class="brand-badge">Microservices Platform</span>
+                </div>
+            </div>
+
+            <!-- Global Status Bar -->
+            <div class="pipeline-status-bar">
+                <div class="status-indicator active">
+                    <span class="pulse-dot"></span>
+                    <span>Kafka Backbone: <strong>Healthy</strong></span>
+                </div>
+                <div class="service-pill" title="Port 8081">Application <span>:8081</span></div>
+                <div class="service-pill" title="Port 8082">Credit <span>:8082</span></div>
+                <div class="service-pill" title="Port 8083">Underwriting <span>:8083</span></div>
+                <div class="service-pill" title="Port 8084">Disbursement <span>:8084</span></div>
+                <div class="service-pill" title="Port 8085">Notification <span>:8085</span></div>
+            </div>
+        </header>
+
+        <!-- Navigation Tabs -->
+        <nav class="tab-navigation">
+            <button class="nav-btn active" data-tab="apply">
+                <i class="fa-solid fa-file-signature"></i> Apply for Loan
+            </button>
+            <button class="nav-btn" data-tab="tracker">
+                <i class="fa-solid fa-diagram-project"></i> Saga Pipeline Visualizer
+            </button>
+            <button class="nav-btn" data-tab="underwriting">
+                <i class="fa-solid fa-user-check"></i> Underwriter Portal
+                <span class="badge-count" id="pendingReviewCount">1</span>
+            </button>
+            <button class="nav-btn" data-tab="idempotency">
+                <i class="fa-solid fa-fingerprint"></i> Idempotency Engine
+            </button>
+            <button class="nav-btn" data-tab="notifications">
+                <i class="fa-solid fa-bell"></i> Live Event Stream
+            </button>
+        </nav>
+
+        <!-- Main Content Body -->
+        <main class="main-content">
+
+            <!-- TAB 1: APPLY FOR LOAN -->
+            <section id="tab-apply" class="tab-page active">
+                <div class="grid-2col">
+                    <div class="card card-glow">
+                        <div class="card-header">
+                            <h2><i class="fa-solid fa-paper-plane"></i> Submit New Loan Application</h2>
+                            <p>Initiate the microservices saga pipeline</p>
+                        </div>
+                        <form id="loanForm" class="form-grid">
+                            <div class="form-group">
+                                <label for="applicantName"><i class="fa-solid fa-user"></i> Applicant Full Name</label>
+                                <input type="text" id="applicantName" placeholder="e.g. Radhika Sharma" value="Radhika Sharma" required>
+                            </div>
+                            <div class="form-group">
+                                <label for="applicantEmail"><i class="fa-solid fa-envelope"></i> Email Address</label>
+                                <input type="email" id="applicantEmail" placeholder="radhika@example.com" value="radhika@example.com" required>
+                            </div>
+                            <div class="form-group">
+                                <label for="applicantSsn"><i class="fa-solid fa-id-card"></i> Social Security Number (SSN)</label>
+                                <input type="text" id="applicantSsn" placeholder="XXX-XX-6789" value="123-45-6789" required>
+                                <small class="hint">Tip: Use ending '9999' to simulate Resilience4j Circuit Breaker trigger!</small>
+                            </div>
+                            <div class="form-group">
+                                <label for="monthlyIncome"><i class="fa-solid fa-money-bill-wave"></i> Monthly Income ($)</label>
+                                <input type="number" id="monthlyIncome" placeholder="8500" value="8500" required>
+                            </div>
+                            <div class="form-group">
+                                <label for="requestedAmount"><i class="fa-solid fa-sack-dollar"></i> Requested Loan Amount ($)</label>
+                                <input type="number" id="requestedAmount" placeholder="35000" value="35000" required>
+                            </div>
+                            <div class="form-group">
+                                <label for="loanTerm"><i class="fa-solid fa-calendar-days"></i> Loan Term (Months)</label>
+                                <select id="loanTerm">
+                                    <option value="12">12 Months (1 Year)</option>
+                                    <option value="24">24 Months (2 Years)</option>
+                                    <option value="36" selected>36 Months (3 Years)</option>
+                                    <option value="60">60 Months (5 Years)</option>
+                                </select>
+                            </div>
+                            <div class="form-group full-width">
+                                <label for="kycDocumentRef"><i class="fa-solid fa-file-pdf"></i> KYC Document Reference (S3)</label>
+                                <input type="text" id="kycDocumentRef" value="s3://loanflow-kyc/docs/kyc_radhika_2026.pdf" readonly>
+                            </div>
+                            <div class="form-actions full-width">
+                                <button type="submit" class="btn btn-primary btn-lg" id="submitAppBtn">
+                                    <i class="fa-solid fa-bolt"></i> Submit Application & Start Saga
+                                </button>
+                            </div>
+                        </form>
+                    </div>
+
+                    <!-- Quick Pipeline Preview -->
+                    <div class="card card-dark">
+                        <div class="card-header">
+                            <h2><i class="fa-solid fa-route"></i> Live Pipeline Execution Flow</h2>
+                            <p>Event-driven state transitions across 5 microservices</p>
+                        </div>
+                        <div class="timeline-stepper">
+                            <div class="step-item" id="step-submitted">
+                                <div class="step-icon"><i class="fa-solid fa-1"></i></div>
+                                <div class="step-content">
+                                    <h4>1. Application Service (:8081)</h4>
+                                    <p>Validates applicant, saves application state <code>SUBMITTED</code>, emits <code>ApplicationSubmittedEvent</code> to Kafka.</p>
+                                </div>
+                            </div>
+                            <div class="step-item" id="step-credit">
+                                <div class="step-icon"><i class="fa-solid fa-2"></i></div>
+                                <div class="step-content">
+                                    <h4>2. Credit Scoring Service (:8082)</h4>
+                                    <p>Computes score via Credit Bureau Client (protected by <strong>Resilience4j Circuit Breaker</strong>), emits <code>CreditScoredEvent</code>.</p>
+                                </div>
+                            </div>
+                            <div class="step-item" id="step-underwriting">
+                                <div class="step-icon"><i class="fa-solid fa-3"></i></div>
+                                <div class="step-content">
+                                    <h4>3. Underwriting Service (:8083)</h4>
+                                    <p>Rule Engine evaluates risk tier (Auto-Approve ≥700, Auto-Reject &lt;550, Manual Review 550-699), emits <code>UnderwritingDecidedEvent</code>.</p>
+                                </div>
+                            </div>
+                            <div class="step-item" id="step-disbursement">
+                                <div class="step-icon"><i class="fa-solid fa-4"></i></div>
+                                <div class="step-content">
+                                    <h4>4. Disbursement Service (:8084)</h4>
+                                    <p>Executes fund transfer with <strong>Idempotency-Key</strong> constraint, emits <code>DisbursedEvent</code>.</p>
+                                </div>
+                            </div>
+                            <div class="step-item" id="step-notification">
+                                <div class="step-icon"><i class="fa-solid fa-5"></i></div>
+                                <div class="step-content">
+                                    <h4>5. Notification Service (:8085)</h4>
+                                    <p>Consumes pipeline events and dispatches Email/SMS notifications to applicant.</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- TAB 2: SAGA PIPELINE VISUALIZER -->
+            <section id="tab-tracker" class="tab-page">
+                <div class="card card-glow">
+                    <div class="card-header flex-between">
+                        <div>
+                            <h2><i class="fa-solid fa-diagram-project"></i> Active Application Saga Pipeline Visualizer</h2>
+                            <p>Track real-time event propagation and state transitions across Kafka topics</p>
+                        </div>
+                        <div class="action-buttons">
+                            <button class="btn btn-secondary btn-sm" id="refreshApplicationsBtn">
+                                <i class="fa-solid fa-rotate-right"></i> Refresh Applications
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Application Selector -->
+                    <div class="app-selector-bar">
+                        <label><i class="fa-solid fa-list-check"></i> Select Application ID:</label>
+                        <select id="activeAppSelector" class="select-styled">
+                            <!-- Populated dynamically -->
+                        </select>
+                    </div>
+
+                    <!-- Visual Stage Stepper Cards -->
+                    <div class="saga-visualizer-grid" id="sagaVisualizerGrid">
+                        <!-- Rendered by JS -->
+                    </div>
+
+                    <!-- Event Payload JSON Inspection -->
+                    <div class="json-inspector-box">
+                        <div class="json-header">
+                            <span><i class="fa-solid fa-code"></i> Live Kafka Topic Event Payload (JSON)</span>
+                            <span class="topic-tag" id="currentTopicTag">Topic: loan-application-submitted</span>
+                        </div>
+                        <pre id="jsonPayloadDisplay">Select an application above to inspect the emitted Kafka event data.</pre>
+                    </div>
+                </div>
+            </section>
+
+            <!-- TAB 3: UNDERWRITER PORTAL -->
+            <section id="tab-underwriting" class="tab-page">
+                <div class="card">
+                    <div class="card-header">
+                        <h2><i class="fa-solid fa-user-check"></i> Underwriter Manual Review Portal</h2>
+                        <p>Evaluate applications flagged in score range <strong>550 – 699</strong> requiring human decision</p>
+                    </div>
+
+                    <div class="table-responsive">
+                        <table class="data-table">
+                            <thead>
+                                <tr>
+                                    <th>App ID</th>
+                                    <th>Applicant</th>
+                                    <th>Credit Score</th>
+                                    <th>Income ($)</th>
+                                    <th>Requested ($)</th>
+                                    <th>Status</th>
+                                    <th>Action</th>
+                                </tr>
+                            </thead>
+                            <tbody id="underwritingTableBody">
+                                <!-- Populated dynamically -->
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <!-- Decision Modal / Card -->
+                <div class="card card-glow margin-top" id="manualDecisionCard" style="display:none;">
+                    <div class="card-header">
+                        <h3><i class="fa-solid fa-gavel"></i> Manual Underwriting Decision Form</h3>
+                        <p id="decidingAppLabel">Application #102 — Applicant: Radhika Sharma</p>
+                    </div>
+                    <form id="manualDecisionForm" class="form-grid">
+                        <input type="hidden" id="modalAppId">
+                        <div class="form-group">
+                            <label><i class="fa-solid fa-scale-balanced"></i> Decision Status</label>
+                            <select id="decisionStatus">
+                                <option value="APPROVED">APPROVED</option>
+                                <option value="REJECTED">REJECTED</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label><i class="fa-solid fa-dollar-sign"></i> Approved Loan Amount ($)</label>
+                            <input type="number" id="decisionApprovedAmount" value="30000">
+                        </div>
+                        <div class="form-group">
+                            <label><i class="fa-solid fa-percent"></i> Interest Rate (%)</label>
+                            <input type="number" step="0.1" id="decisionInterestRate" value="6.8">
+                        </div>
+                        <div class="form-group full-width">
+                            <label><i class="fa-solid fa-comment-medical"></i> Decision Notes</label>
+                            <textarea id="decisionNotes" rows="2">Approved after manual verification of tax returns and steady monthly income.</textarea>
+                        </div>
+                        <div class="form-actions full-width">
+                            <button type="submit" class="btn btn-success"><i class="fa-solid fa-check"></i> Submit Decision & Emit Event</button>
+                        </div>
+                    </form>
+                </div>
+            </section>
+
+            <!-- TAB 4: IDEMPOTENCY ENGINE -->
+            <section id="tab-idempotency" class="tab-page">
+                <div class="card card-glow">
+                    <div class="card-header">
+                        <h2><i class="fa-solid fa-fingerprint"></i> Financial Idempotency Engine & Retry Simulator</h2>
+                        <p>Demonstrates how the Disbursement Service prevents duplicate transfers using <code>Idempotency-Key</code></p>
+                    </div>
+
+                    <div class="idempotency-demo-grid">
+                        <div class="idempotency-control-card">
+                            <h3><i class="fa-solid fa-vial"></i> Test Transfer Request</h3>
+                            <form id="idempotencyForm" class="form-grid">
+                                <div class="form-group full-width">
+                                    <label><i class="fa-solid fa-key"></i> Idempotency-Key Header</label>
+                                    <input type="text" id="idemKeyInput" value="IDEM-TEST-884920" required>
+                                </div>
+                                <div class="form-group">
+                                    <label>Application ID</label>
+                                    <input type="number" id="idemAppId" value="101" required>
+                                </div>
+                                <div class="form-group">
+                                    <label>Disbursement Amount ($)</label>
+                                    <input type="number" id="idemAmount" value="35000" required>
+                                </div>
+                                <div class="form-group full-width">
+                                    <label>Bank Account Number</label>
+                                    <input type="text" id="idemAccount" value="ACCT-9876543210" required>
+                                </div>
+                                <div class="form-actions full-width gap-10">
+                                    <button type="submit" class="btn btn-primary" id="sendIdemBtn">
+                                        <i class="fa-solid fa-paper-plane"></i> Send Disbursement Request #1
+                                    </button>
+                                    <button type="button" class="btn btn-warning" id="retryIdemBtn">
+                                        <i class="fa-solid fa-arrows-rotate"></i> Simulate Network Retry (Same Key)
+                                    </button>
+                                </div>
+                            </form>
+                        </div>
+
+                        <!-- Response Console -->
+                        <div class="idempotency-console-card">
+                            <h3><i class="fa-solid fa-terminal"></i> Disbursement Engine Response Console</h3>
+                            <div class="console-box" id="idemConsoleBox">
+                                <div class="console-line info">[System] Idempotency Engine ready. Send a request above to test.</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- TAB 5: LIVE NOTIFICATION FEED -->
+            <section id="tab-notifications" class="tab-page">
+                <div class="card">
+                    <div class="card-header flex-between">
+                        <div>
+                            <h2><i class="fa-solid fa-bell"></i> Asynchronous Notification Event Stream</h2>
+                            <p>Live messages dispatched by Notification Service listening to Kafka topics</p>
+                        </div>
+                        <button class="btn btn-secondary btn-sm" id="clearNotificationsBtn">
+                            <i class="fa-solid fa-trash"></i> Clear Stream
+                        </button>
+                    </div>
+
+                    <div class="notification-stream" id="notificationStream">
+                        <!-- Populated dynamically -->
+                    </div>
+                </div>
+            </section>
+
+        </main>
+    </div>
+
+    <script src="app.js"></script>
+</body>
+</html>
