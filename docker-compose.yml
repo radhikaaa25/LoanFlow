@@ -85,3 +85,11 @@ services:
       - kafka
     environment:
       SPRING_KAFKA_BOOTSTRAP_SERVERS: kafka:29092
+
+  frontend:
+    image: nginx:alpine
+    container_name: loanflow-frontend
+    ports:
+      - "3000:80"
+    volumes:
+      - ./frontend:/usr/share/nginx/html:ro
