@@ -24,4 +24,7 @@ public class LoanApplicationRequest {
     private Integer loanTermMonths;
 
     private String kycDocumentRef;
+
+    private String ssn;
+    private BigDecimal monthlyIncome;
 }

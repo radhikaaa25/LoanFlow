@@ -9,12 +9,21 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.List;
+
 @RestController
 @RequestMapping("/api/v1/underwriting")
 @RequiredArgsConstructor
+@CrossOrigin(origins = "*")
 public class UnderwritingController {
 
     private final UnderwritingService underwritingService;
+
+    @GetMapping
+    public ResponseEntity<ApiResponse<List<UnderwritingResponse>>> getAllDecisions() {
+        List<UnderwritingResponse> responses = underwritingService.getAllDecisions();
+        return ResponseEntity.ok(ApiResponse.success(responses));
+    }
 
     @PostMapping("/decide")
     public ResponseEntity<ApiResponse<UnderwritingResponse>> submitManualDecision(

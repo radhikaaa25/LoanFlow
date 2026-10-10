@@ -36,8 +36,16 @@ public class CreditScoringServiceImpl implements CreditScoringService {
         log.info("Processing credit evaluation for Application ID: {}", event.getApplicationId());
 
         int score = bureauClient.fetchScoreFromBureau(event.getSsn());
-        CreditTier tier = calculateTier(score);
         BigDecimal dtiRatio = calculateDti(event.getMonthlyIncome(), event.getRequestedAmount());
+
+        // Dynamic financial adjustment: Low DTI boosts score, high DTI penalizes
+        if (dtiRatio.compareTo(BigDecimal.valueOf(0.20)) <= 0) {
+            score = Math.min(850, score + 70);
+        } else if (dtiRatio.compareTo(BigDecimal.valueOf(0.45)) > 0) {
+            score = Math.max(350, score - 60);
+        }
+
+        CreditTier tier = calculateTier(score);
 
         CreditReport report = CreditReport.builder()
                 .applicationId(event.getApplicationId())

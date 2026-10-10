@@ -12,9 +12,16 @@ import java.util.List;
 @RestController
 @RequestMapping("/api/v1/notifications")
 @RequiredArgsConstructor
+@CrossOrigin(origins = "*")
 public class NotificationController {
 
     private final NotificationService notificationService;
+
+    @GetMapping
+    public ResponseEntity<ApiResponse<List<NotificationLog>>> getAllNotifications() {
+        List<NotificationLog> logs = notificationService.getAllNotifications();
+        return ResponseEntity.ok(ApiResponse.success(logs));
+    }
 
     @GetMapping("/applications/{applicationId}")
     public ResponseEntity<ApiResponse<List<NotificationLog>>> getNotificationsByApplication(

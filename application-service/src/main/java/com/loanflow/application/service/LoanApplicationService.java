@@ -9,4 +9,5 @@ public interface LoanApplicationService {
     LoanApplicationResponse submitApplication(LoanApplicationRequest request, String applicantEmail);
     LoanApplicationResponse getApplicationById(Long id, String applicantEmail);
     List<LoanApplicationResponse> getApplicantApplications(String applicantEmail);
+    List<LoanApplicationResponse> getAllApplications();
 }

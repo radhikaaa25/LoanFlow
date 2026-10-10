@@ -14,4 +14,5 @@ public interface NotificationService {
     void sendUnderwritingDecidedNotification(UnderwritingDecidedEvent event);
     void sendDisbursementCompletedNotification(DisbursedEvent event);
     List<NotificationLog> getNotificationsByApplicationId(Long applicationId);
+    List<NotificationLog> getAllNotifications();
 }

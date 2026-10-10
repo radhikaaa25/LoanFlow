@@ -18,6 +18,8 @@ public class LoanApplicationResponse {
     private Long applicantId;
     private String applicantName;
     private String applicantEmail;
+    private String ssn;
+    private BigDecimal monthlyIncome;
     private BigDecimal requestedAmount;
     private Integer loanTermMonths;
     private String kycDocumentRef;

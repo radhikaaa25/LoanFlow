@@ -99,6 +99,13 @@ public class UnderwritingServiceImpl implements UnderwritingService {
         return mapToResponse(decision);
     }
 
+    @Override
+    public java.util.List<UnderwritingResponse> getAllDecisions() {
+        return decisionRepository.findAll().stream()
+                .map(this::mapToResponse)
+                .collect(java.util.stream.Collectors.toList());
+    }
+
     private void publishEvent(UnderwritingDecision decision) {
         UnderwritingDecidedEvent event = UnderwritingDecidedEvent.builder()
                 .applicationId(decision.getApplicationId())

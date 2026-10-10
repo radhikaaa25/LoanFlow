@@ -37,6 +37,15 @@ public class LoanApplicationServiceImpl implements LoanApplicationService {
         Applicant applicant = applicantRepository.findByEmail(applicantEmail)
                 .orElseThrow(() -> new ResourceNotFoundException("Applicant not found with email: " + applicantEmail));
 
+        // Update applicant SSN and monthly income dynamically from submission
+        if (request.getSsn() != null && !request.getSsn().isBlank()) {
+            applicant.setSsn(request.getSsn().trim());
+        }
+        if (request.getMonthlyIncome() != null && request.getMonthlyIncome().compareTo(java.math.BigDecimal.ZERO) > 0) {
+            applicant.setMonthlyIncome(request.getMonthlyIncome());
+        }
+        applicantRepository.save(applicant);
+
         LoanApplication application = LoanApplication.builder()
                 .applicant(applicant)
                 .requestedAmount(request.getRequestedAmount())
@@ -89,12 +98,21 @@ public class LoanApplicationServiceImpl implements LoanApplicationService {
                 .collect(Collectors.toList());
     }
 
+    @Override
+    public List<LoanApplicationResponse> getAllApplications() {
+        return applicationRepository.findAll().stream()
+                .map(this::mapToResponse)
+                .collect(Collectors.toList());
+    }
+
     private LoanApplicationResponse mapToResponse(LoanApplication app) {
         return LoanApplicationResponse.builder()
                 .id(app.getId())
                 .applicantId(app.getApplicant().getId())
                 .applicantName(app.getApplicant().getName())
                 .applicantEmail(app.getApplicant().getEmail())
+                .ssn(app.getApplicant().getSsn())
+                .monthlyIncome(app.getApplicant().getMonthlyIncome())
                 .requestedAmount(app.getRequestedAmount())
                 .loanTermMonths(app.getLoanTermMonths())
                 .kycDocumentRef(app.getKycDocumentRef())

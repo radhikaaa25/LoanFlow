@@ -57,6 +57,11 @@ public class NotificationServiceImpl implements NotificationService {
         return repository.findByApplicationId(applicationId);
     }
 
+    @Override
+    public List<NotificationLog> getAllNotifications() {
+        return repository.findAll();
+    }
+
     private void logNotification(String channel, Long applicationId, Long applicantId, String type, String topic, String message) {
         log.info("📢 [NOTIFICATION SENT - {}] AppId: {} | Msg: {}", channel, applicationId, message);
 

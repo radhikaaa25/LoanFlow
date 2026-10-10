@@ -17,9 +17,16 @@ import java.util.List;
 @RestController
 @RequestMapping("/api/v1/applications")
 @RequiredArgsConstructor
+@CrossOrigin(origins = "*")
 public class LoanApplicationController {
 
     private final LoanApplicationService applicationService;
+
+    @GetMapping("/all")
+    public ResponseEntity<ApiResponse<List<LoanApplicationResponse>>> getAllApplications() {
+        List<LoanApplicationResponse> responses = applicationService.getAllApplications();
+        return ResponseEntity.ok(ApiResponse.success(responses));
+    }
 
     @PostMapping
     public ResponseEntity<ApiResponse<LoanApplicationResponse>> submitApplication(

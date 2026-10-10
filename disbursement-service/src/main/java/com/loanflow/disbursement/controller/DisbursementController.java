@@ -12,9 +12,15 @@ import org.springframework.web.bind.annotation.*;
 @RestController
 @RequestMapping("/api/v1/disbursements")
 @RequiredArgsConstructor
+@CrossOrigin(origins = "*")
 public class DisbursementController {
 
     private final DisbursementService disbursementService;
+
+    @GetMapping
+    public ResponseEntity<ApiResponse<String>> checkHealth() {
+        return ResponseEntity.ok(ApiResponse.success("Disbursement service is operational"));
+    }
 
     @PostMapping
     public ResponseEntity<ApiResponse<DisbursementResponse>> executeDisbursement(
