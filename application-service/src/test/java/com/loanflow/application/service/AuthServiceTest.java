@@ -65,7 +65,7 @@ class AuthServiceTest {
                 .passwordHash("encodedPassword")
                 .ssn("123-45-6789")
                 .monthlyIncome(BigDecimal.valueOf(8000))
-                .role(UserRole.APPLICANT)
+                .role(UserRole.USER)
                 .build();
     }
 

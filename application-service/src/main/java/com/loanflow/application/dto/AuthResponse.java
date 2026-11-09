@@ -6,6 +6,8 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.math.BigDecimal;
+
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
@@ -15,5 +17,7 @@ public class AuthResponse {
     private Long applicantId;
     private String name;
     private String email;
+    private String ssn;
+    private BigDecimal monthlyIncome;
     private UserRole role;
 }

@@ -3,6 +3,7 @@ package com.loanflow.underwriting.controller;
 import com.loanflow.common.dto.ApiResponse;
 import com.loanflow.underwriting.dto.ManualDecisionRequest;
 import com.loanflow.underwriting.dto.UnderwritingResponse;
+import com.loanflow.underwriting.security.JwtAdminGuard;
 import com.loanflow.underwriting.service.UnderwritingService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -18,6 +19,7 @@ import java.util.List;
 public class UnderwritingController {
 
     private final UnderwritingService underwritingService;
+    private final JwtAdminGuard jwtAdminGuard;
 
     @GetMapping
     public ResponseEntity<ApiResponse<List<UnderwritingResponse>>> getAllDecisions() {
@@ -27,7 +29,9 @@ public class UnderwritingController {
 
     @PostMapping("/decide")
     public ResponseEntity<ApiResponse<UnderwritingResponse>> submitManualDecision(
+            @RequestHeader(value = "Authorization", required = false) String authorizationHeader,
             @Valid @RequestBody ManualDecisionRequest request) {
+        jwtAdminGuard.requireAdmin(authorizationHeader);
         UnderwritingResponse response = underwritingService.submitManualDecision(request);
         return ResponseEntity.ok(ApiResponse.success("Manual decision submitted successfully", response));
     }

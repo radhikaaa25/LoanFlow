@@ -16,6 +16,8 @@ spring:
     hibernate:
       ddl-auto: update
     show-sql: true
+  flyway:
+    enabled: false
   kafka:
     bootstrap-servers: localhost:9092
     producer:

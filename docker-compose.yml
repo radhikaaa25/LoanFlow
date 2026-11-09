@@ -1,5 +1,3 @@
-version: '3.8'
-
 services:
   zookeeper:
     image: confluentinc/cp-zookeeper:7.5.0
@@ -26,6 +24,70 @@ services:
       KAFKA_TRANSACTION_STATE_LOG_MIN_ISR: 1
       KAFKA_TRANSACTION_STATE_LOG_REPLICATION_FACTOR: 1
 
+  # ── PostgreSQL Databases (one per service, shared image) ──────────────
+
+  postgres-application:
+    image: postgres:16-alpine
+    container_name: loanflow-postgres-application
+    ports:
+      - "5432:5432"
+    environment:
+      POSTGRES_DB: applicationdb
+      POSTGRES_USER: loanflow
+      POSTGRES_PASSWORD: loanflow
+    volumes:
+      - pgdata-application:/var/lib/postgresql/data
+
+  postgres-credit:
+    image: postgres:16-alpine
+    container_name: loanflow-postgres-credit
+    ports:
+      - "5433:5432"
+    environment:
+      POSTGRES_DB: creditdb
+      POSTGRES_USER: loanflow
+      POSTGRES_PASSWORD: loanflow
+    volumes:
+      - pgdata-credit:/var/lib/postgresql/data
+
+  postgres-underwriting:
+    image: postgres:16-alpine
+    container_name: loanflow-postgres-underwriting
+    ports:
+      - "5434:5432"
+    environment:
+      POSTGRES_DB: underwritingdb
+      POSTGRES_USER: loanflow
+      POSTGRES_PASSWORD: loanflow
+    volumes:
+      - pgdata-underwriting:/var/lib/postgresql/data
+
+  postgres-disbursement:
+    image: postgres:16-alpine
+    container_name: loanflow-postgres-disbursement
+    ports:
+      - "5435:5432"
+    environment:
+      POSTGRES_DB: disbursementdb
+      POSTGRES_USER: loanflow
+      POSTGRES_PASSWORD: loanflow
+    volumes:
+      - pgdata-disbursement:/var/lib/postgresql/data
+
+  postgres-notification:
+    image: postgres:16-alpine
+    container_name: loanflow-postgres-notification
+    ports:
+      - "5436:5432"
+    environment:
+      POSTGRES_DB: notificationdb
+      POSTGRES_USER: loanflow
+      POSTGRES_PASSWORD: loanflow
+    volumes:
+      - pgdata-notification:/var/lib/postgresql/data
+
+  # ── Application Services ──────────────────────────────────────────────
+
   application-service:
     build:
       context: .
@@ -35,8 +97,11 @@ services:
       - "8081:8081"
     depends_on:
       - kafka
+      - postgres-application
     environment:
+      SPRING_PROFILES_ACTIVE: docker
       SPRING_KAFKA_BOOTSTRAP_SERVERS: kafka:29092
+      DB_HOST: postgres-application
 
   credit-scoring-service:
     build:
@@ -47,8 +112,11 @@ services:
       - "8082:8082"
     depends_on:
       - kafka
+      - postgres-credit
     environment:
+      SPRING_PROFILES_ACTIVE: docker
       SPRING_KAFKA_BOOTSTRAP_SERVERS: kafka:29092
+      DB_HOST: postgres-credit
 
   underwriting-service:
     build:
@@ -59,8 +127,11 @@ services:
       - "8083:8083"
     depends_on:
       - kafka
+      - postgres-underwriting
     environment:
+      SPRING_PROFILES_ACTIVE: docker
       SPRING_KAFKA_BOOTSTRAP_SERVERS: kafka:29092
+      DB_HOST: postgres-underwriting
 
   disbursement-service:
     build:
@@ -71,8 +142,11 @@ services:
       - "8084:8084"
     depends_on:
       - kafka
+      - postgres-disbursement
     environment:
+      SPRING_PROFILES_ACTIVE: docker
       SPRING_KAFKA_BOOTSTRAP_SERVERS: kafka:29092
+      DB_HOST: postgres-disbursement
 
   notification-service:
     build:
@@ -83,8 +157,11 @@ services:
       - "8085:8085"
     depends_on:
       - kafka
+      - postgres-notification
     environment:
+      SPRING_PROFILES_ACTIVE: docker
       SPRING_KAFKA_BOOTSTRAP_SERVERS: kafka:29092
+      DB_HOST: postgres-notification
 
   frontend:
     image: nginx:alpine
@@ -93,3 +170,10 @@ services:
       - "3000:80"
     volumes:
       - ./frontend:/usr/share/nginx/html:ro
+
+volumes:
+  pgdata-application:
+  pgdata-credit:
+  pgdata-underwriting:
+  pgdata-disbursement:
+  pgdata-notification:

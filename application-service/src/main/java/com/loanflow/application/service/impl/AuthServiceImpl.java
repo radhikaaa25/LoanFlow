@@ -9,6 +9,7 @@ import com.loanflow.application.security.JwtTokenProvider;
 import com.loanflow.application.service.AuthService;
 import com.loanflow.common.enums.UserRole;
 import com.loanflow.common.exception.BusinessLogicException;
+import com.loanflow.common.exception.ResourceNotFoundException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
@@ -27,27 +28,44 @@ public class AuthServiceImpl implements AuthService {
             throw new BusinessLogicException("Email address already registered");
         }
 
+        // Determine role: default to USER, allow ADMIN if explicitly requested
+        UserRole role = UserRole.USER;
+        if (request.getRole() != null && request.getRole().equalsIgnoreCase("ADMIN")) {
+            role = UserRole.ADMIN;
+        }
+
+        // SSN and monthlyIncome are required for applicants (USER), optional for ADMIN
+        if (role == UserRole.USER) {
+            if (request.getSsn() == null || request.getSsn().isBlank()) {
+                throw new BusinessLogicException("SSN is required for applicant registration");
+            }
+            if (request.getMonthlyIncome() == null || request.getMonthlyIncome().signum() <= 0) {
+                throw new BusinessLogicException("Monthly income must be positive for applicant registration");
+            }
+        }
+
         Applicant applicant = Applicant.builder()
                 .name(request.getName())
                 .email(request.getEmail())
                 .passwordHash(passwordEncoder.encode(request.getPassword()))
-                .ssn(request.getSsn())
-                .monthlyIncome(request.getMonthlyIncome())
-                .role(UserRole.APPLICANT)
+                .ssn(role == UserRole.ADMIN ? null : request.getSsn())
+                .monthlyIncome(role == UserRole.ADMIN ? null : request.getMonthlyIncome())
+                .role(role)
                 .build();
 
         Applicant savedApplicant = applicantRepository.save(applicant);
         String token = tokenProvider.generateToken(
                 savedApplicant.getEmail(),
                 savedApplicant.getId(),
-                savedApplicant.getRole().name()
-        );
+                savedApplicant.getRole().name());
 
         return AuthResponse.builder()
                 .token(token)
                 .applicantId(savedApplicant.getId())
                 .name(savedApplicant.getName())
                 .email(savedApplicant.getEmail())
+                .ssn(savedApplicant.getSsn())
+                .monthlyIncome(savedApplicant.getMonthlyIncome())
                 .role(savedApplicant.getRole())
                 .build();
     }
@@ -64,14 +82,30 @@ public class AuthServiceImpl implements AuthService {
         String token = tokenProvider.generateToken(
                 applicant.getEmail(),
                 applicant.getId(),
-                applicant.getRole().name()
-        );
+                applicant.getRole().name());
 
         return AuthResponse.builder()
                 .token(token)
                 .applicantId(applicant.getId())
                 .name(applicant.getName())
                 .email(applicant.getEmail())
+                .ssn(applicant.getSsn())
+                .monthlyIncome(applicant.getMonthlyIncome())
+                .role(applicant.getRole())
+                .build();
+    }
+
+    @Override
+    public AuthResponse getCurrentUser(String email) {
+        Applicant applicant = applicantRepository.findByEmail(email)
+                .orElseThrow(() -> new ResourceNotFoundException("User not found with email: " + email));
+
+        return AuthResponse.builder()
+                .applicantId(applicant.getId())
+                .name(applicant.getName())
+                .email(applicant.getEmail())
+                .ssn(applicant.getSsn())
+                .monthlyIncome(applicant.getMonthlyIncome())
                 .role(applicant.getRole())
                 .build();
     }

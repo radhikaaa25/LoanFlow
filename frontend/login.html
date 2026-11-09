@@ -1,0 +1,121 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>LoanFlow — Sign In &amp; Registration</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap"
+        rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="styles.css?v=2.7">
+</head>
+
+<body class="auth-page">
+    <div class="auth-card">
+        <div class="auth-card-header">
+            <div class="auth-brand-icon">
+                <i class="fa-solid fa-layer-group"></i>
+            </div>
+            <div>
+                <h2>LoanFlow Access Portal</h2>
+                <p>Sign in or create an account as a USER or ADMIN</p>
+            </div>
+        </div>
+
+        <div class="auth-tabs">
+            <button type="button" class="auth-tab-btn active" id="authTabLogin">Sign In</button>
+            <button type="button" class="auth-tab-btn" id="authTabRegister">Create Account</button>
+        </div>
+
+        <div class="auth-card-body">
+            <!-- Sign In Form -->
+            <form id="loginForm" class="auth-form">
+                <div class="auth-error" id="loginError"></div>
+                <div class="form-group">
+                    <label for="loginEmail">Email Address *</label>
+                    <input type="email" id="loginEmail" placeholder="you@example.com" required autocomplete="email">
+                </div>
+                <div class="form-group">
+                    <label for="loginPassword">Password *</label>
+                    <input type="password" id="loginPassword" placeholder="Enter your password" required
+                        autocomplete="current-password">
+                </div>
+                <button type="submit" class="btn btn-primary btn-lg" id="loginSubmitBtn"
+                    style="width:100%; margin-top:4px;">
+                    <i class="fa-solid fa-right-to-bracket"></i> Sign In to LoanFlow
+                </button>
+            </form>
+
+            <!-- Register Form -->
+            <form id="registerForm" class="auth-form" style="display:none;">
+                <div class="auth-error" id="registerError"></div>
+
+                <div class="form-group">
+                    <label>Account Role *</label>
+                    <div class="role-selector-grid">
+                        <label class="role-option">
+                            <input type="radio" name="regRole" value="USER" checked>
+                            <div class="role-option-box">
+                                <span class="role-option-title"><i class="fa-solid fa-user"></i> USER</span>
+                                <span class="role-option-desc">Applicant: apply for loans &amp; track status</span>
+                            </div>
+                        </label>
+                        <label class="role-option">
+                            <input type="radio" name="regRole" value="ADMIN">
+                            <div class="role-option-box">
+                                <span class="role-option-title"><i class="fa-solid fa-shield-halved"></i> ADMIN</span>
+                                <span class="role-option-desc">Admin: analytics dashboard, underwriting &amp;
+                                    ledger</span>
+                            </div>
+                        </label>
+                    </div>
+                </div>
+
+                <div class="auth-form-row">
+                    <div class="form-group">
+                        <label for="regName">Full Name *</label>
+                        <input type="text" id="regName" placeholder="e.g. Aman Gupta" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="regEmail">Email Address *</label>
+                        <input type="email" id="regEmail" placeholder="aman@example.com" required>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label for="regPassword">Password *</label>
+                    <input type="password" id="regPassword" placeholder="Min 6 characters" required
+                        autocomplete="new-password">
+                </div>
+
+                <!-- Applicant-only financial fields (hidden for ADMIN) -->
+                <div class="auth-form-row" id="userApplicantFields">
+                    <div class="form-group">
+                        <label for="regSsn">SSN *</label>
+                        <input type="text" id="regSsn" value="123-45-6789" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="regIncome">Monthly Income ($) *</label>
+                        <input type="number" id="regIncome" value="7500" min="1" required>
+                    </div>
+                </div>
+
+                <button type="submit" class="btn btn-primary btn-lg" id="registerSubmitBtn"
+                    style="width:100%; margin-top:4px;">
+                    <i class="fa-solid fa-user-plus"></i> Create Account &amp; Sign In
+                </button>
+            </form>
+        </div>
+    </div>
+
+    <p class="auth-footer-note">LoanFlow Microservices Origination Platform • JWT + Role-Based Access Control (USER /
+        ADMIN)</p>
+
+    <script src="auth.js?v=2.7"></script>
+</body>
+
+</html>

@@ -29,16 +29,16 @@ public class Applicant {
     @Column(name = "password_hash", nullable = false)
     private String passwordHash;
 
-    @Column(nullable = false)
+    @Column
     private String ssn;
 
-    @Column(name = "monthly_income", nullable = false)
+    @Column(name = "monthly_income")
     private BigDecimal monthlyIncome;
 
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
     @Builder.Default
-    private UserRole role = UserRole.APPLICANT;
+    private UserRole role = UserRole.USER;
 
     @CreationTimestamp
     @Column(name = "created_at", nullable = false, updatable = false)

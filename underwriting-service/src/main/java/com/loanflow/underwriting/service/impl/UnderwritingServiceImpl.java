@@ -64,10 +64,9 @@ public class UnderwritingServiceImpl implements UnderwritingService {
 
         UnderwritingDecision savedDecision = decisionRepository.save(decision);
 
-        // Publish event if decision is final (APPROVED or REJECTED)
-        if (status == UnderwritingStatus.APPROVED || status == UnderwritingStatus.REJECTED) {
-            publishEvent(savedDecision);
-        }
+        // Publish event for all outcomes so application-service tracks FLAGGED_FOR_MANUAL_REVIEW too
+        // (disbursement-service only disburses when status == APPROVED)
+        publishEvent(savedDecision);
 
         return mapToResponse(savedDecision);
     }
@@ -81,8 +80,13 @@ public class UnderwritingServiceImpl implements UnderwritingService {
                 .orElseThrow(() -> new ResourceNotFoundException("Underwriting record not found for application: " + request.getApplicationId()));
 
         decision.setStatus(request.getStatus());
-        decision.setApprovedAmount(request.getApprovedAmount());
-        decision.setInterestRate(request.getInterestRate());
+        if (request.getStatus() == UnderwritingStatus.REJECTED) {
+            decision.setApprovedAmount(null);
+            decision.setInterestRate(null);
+        } else {
+            decision.setApprovedAmount(request.getApprovedAmount());
+            decision.setInterestRate(request.getInterestRate());
+        }
         decision.setDecisionNotes(request.getDecisionNotes());
         decision.setUnderwriterId(request.getUnderwriterId());
 

@@ -2,8 +2,6 @@ package com.loanflow.application.dto;
 
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
-import jakarta.validation.constraints.NotNull;
-import jakarta.validation.constraints.Positive;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -26,10 +24,15 @@ public class RegisterRequest {
     @NotBlank(message = "Password is required")
     private String password;
 
-    @NotBlank(message = "SSN is required")
+    // Required only for USER (applicants); optional for ADMIN
     private String ssn;
 
-    @NotNull(message = "Monthly income is required")
-    @Positive(message = "Monthly income must be positive")
+    // Required only for USER (applicants); optional for ADMIN
     private BigDecimal monthlyIncome;
+
+    /**
+     * Optional role field. If "ADMIN" is passed, the user gets admin privileges.
+     * Defaults to USER if omitted.
+     */
+    private String role;
 }

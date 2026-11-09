@@ -4,6 +4,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.loanflow.common.enums.DisbursementStatus;
 import com.loanflow.common.enums.UnderwritingStatus;
 import com.loanflow.common.event.DisbursedEvent;
+import com.loanflow.common.event.DisbursementFailedEvent;
 import com.loanflow.common.event.UnderwritingDecidedEvent;
 import com.loanflow.common.exception.BusinessLogicException;
 import com.loanflow.common.exception.ResourceNotFoundException;
@@ -31,6 +32,7 @@ import java.util.UUID;
 public class DisbursementServiceImpl implements DisbursementService {
 
     public static final String TOPIC_DISBURSEMENT_COMPLETED = "disbursement-completed";
+    public static final String TOPIC_DISBURSEMENT_FAILED = "disbursement-failed";
 
     private final DisbursementRepository disbursementRepository;
     private final IdempotencyLogRepository idempotencyLogRepository;
@@ -129,7 +131,24 @@ public class DisbursementServiceImpl implements DisbursementService {
                 .bankAccountNumber(dummyBankAccount)
                 .build();
 
-        return executeDisbursement(request, idempotencyKey);
+        try {
+            return executeDisbursement(request, idempotencyKey);
+        } catch (Exception e) {
+            log.error("Disbursement FAILED for Application ID: {}. Publishing compensation event.",
+                    event.getApplicationId(), e);
+
+            DisbursementFailedEvent failedEvent = DisbursementFailedEvent.builder()
+                    .applicationId(event.getApplicationId())
+                    .applicantId(event.getApplicantId())
+                    .failureReason(e.getMessage())
+                    .idempotencyKey(idempotencyKey)
+                    .timestamp(LocalDateTime.now())
+                    .build();
+
+            kafkaTemplate.send(TOPIC_DISBURSEMENT_FAILED, event.getApplicationId().toString(), failedEvent);
+            log.info("Published DisbursementFailedEvent (compensation) for Application ID: {}", event.getApplicationId());
+            throw e;
+        }
     }
 
     @Override

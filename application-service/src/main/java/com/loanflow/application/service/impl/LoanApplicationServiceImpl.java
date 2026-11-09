@@ -8,7 +8,9 @@ import com.loanflow.application.repository.ApplicantRepository;
 import com.loanflow.application.repository.LoanApplicationRepository;
 import com.loanflow.application.service.LoanApplicationService;
 import com.loanflow.common.enums.ApplicationStatus;
+import com.loanflow.common.enums.UserRole;
 import com.loanflow.common.event.ApplicationSubmittedEvent;
+import com.loanflow.common.exception.ForbiddenException;
 import com.loanflow.common.exception.ResourceNotFoundException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -82,8 +84,15 @@ public class LoanApplicationServiceImpl implements LoanApplicationService {
 
     @Override
     public LoanApplicationResponse getApplicationById(Long id, String applicantEmail) {
+        Applicant caller = applicantRepository.findByEmail(applicantEmail)
+                .orElseThrow(() -> new ResourceNotFoundException("Applicant not found with email: " + applicantEmail));
+
         LoanApplication application = applicationRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Loan application not found with ID: " + id));
+
+        if (caller.getRole() != UserRole.ADMIN && !application.getApplicant().getId().equals(caller.getId())) {
+            throw new ForbiddenException("You do not have permission to view this loan application");
+        }
 
         return mapToResponse(application);
     }
